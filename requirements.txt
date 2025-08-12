@@ -958,3 +958,6 @@ websockets==15.0.1
     # via uvicorn
 yarl==1.19.0
     # via aiohttp
+
+# My own modules
+elevenlabs==2.9.2

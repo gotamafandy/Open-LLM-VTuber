@@ -431,6 +431,26 @@ class MinimaxTTSConfig(I18nMixin):
     }
 
 
+class ElevenLabsTTSConfig(I18nMixin):
+    """Configuration for ElevenLabs TTS service."""
+
+    api_key: str = Field(..., alias="api_key")
+    voice_id: str = Field(..., alias="voice_id")
+    model_id: str = Field(..., alias="model_id")
+
+    DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
+        "api_key": Description(
+            en="API key for ElevenLabs TTS service", zh="ElevenLabs TTS 服务的 API 密钥"
+        ),
+        "voice_id": Description(
+            en="Voice ID to use for ElevenLabs TTS", zh="ElevenLabs TTS 使用的语音 ID"
+        ),
+        "model_id": Description(
+            en="Model ID to use for ElevenLabs TTS", zh="ElevenLabs TTS 使用的模型 ID"
+        ),
+    }
+
+
 class TTSConfig(I18nMixin):
     """Configuration for Text-to-Speech."""
 
@@ -450,6 +470,7 @@ class TTSConfig(I18nMixin):
         "openai_tts",  # Add openai_tts here
         "spark_tts",
         "minimax_tts",
+        "elevenlabs_tts",
     ] = Field(..., alias="tts_model")
 
     azure_tts: Optional[AzureTTSConfig] = Field(None, alias="azure_tts")
@@ -471,6 +492,7 @@ class TTSConfig(I18nMixin):
     openai_tts: Optional[OpenAITTSConfig] = Field(None, alias="openai_tts")
     spark_tts: Optional[SparkTTSConfig] = Field(None, alias="spark_tts")
     minimax_tts: Optional[MinimaxTTSConfig] = Field(None, alias="minimax_tts")
+    elevenlabs_tts: Optional[ElevenLabsTTSConfig] = Field(None, alias="elevenlabs_tts")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "tts_model": Description(
@@ -506,6 +528,9 @@ class TTSConfig(I18nMixin):
         "spark_tts": Description(en="Configuration for Spark TTS", zh="Spark TTS 配置"),
         "minimax_tts": Description(
             en="Configuration for Minimax TTS", zh="Minimax TTS 配置"
+        ),
+        "elevenlabs_tts": Description(
+            en="Configuration for ElevenLabs TTS", zh="ElevenLabs TTS 配置"
         ),
     }
 
@@ -544,5 +569,7 @@ class TTSConfig(I18nMixin):
             values.spark_tts.model_validate(values.spark_tts.model_dump())
         elif tts_model == "minimax_tts" and values.minimax_tts is not None:
             values.minimax_tts.model_validate(values.minimax_tts.model_dump())
+        elif tts_model == "elevenlabs_tts" and values.elevenlabs_tts is not None:
+            values.elevenlabs_tts.model_validate(values.elevenlabs_tts.model_dump())
 
         return values

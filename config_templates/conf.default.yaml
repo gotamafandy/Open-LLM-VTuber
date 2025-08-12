@@ -274,7 +274,7 @@ character_config:
     #   'azure_tts', 'pyttsx3_tts', 'edge_tts', 'bark_tts',
     #   'cosyvoice_tts', 'melo_tts', 'coqui_tts',
     #   'fish_api_tts', 'x_tts', 'gpt_sovits_tts', 'sherpa_onnx_tts'
-    #   'minimax_tts'
+    #   'minimax_tts', 'elevenlabs_tts'
 
     azure_tts:
       api_key: 'azure-api-key'
@@ -419,6 +419,12 @@ character_config:
       # Custom pronunciation dictionary, default empty.
       # Example: '{"tone": ["测试/(ce4)(shi4)", "危险/dangerous"]}'
       pronunciation_dict: ''
+
+    # For more details, see: https://elevenlabs.io/docs/api-reference
+    elevenlabs_tts:
+      api_key: '' # Your ElevenLabs API key
+      voice_id: '' # Voice ID from ElevenLabs (e.g., '21m00Tcm4TlvDq8ikWAM')
+      model_id: 'eleven_monolingual_v1' # Model ID (e.g., 'eleven_monolingual_v1', 'eleven_multilingual_v2')
 
   # =================== Voice Activity Detection ===================
   vad_config:

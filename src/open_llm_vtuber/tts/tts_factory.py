@@ -172,6 +172,14 @@ class TTSFactory:
                 pitch=kwargs.get("pitch"),
                 speed=kwargs.get("speed"),
             )
+        elif engine_type == "elevenlabs_tts":
+            from .elevenlabs_tts import TTSEngine as ElevenLabsTTSEngine
+
+            return ElevenLabsTTSEngine(
+                api_key=kwargs.get("api_key"),
+                voice_id=kwargs.get("voice_id"),
+                model_id=kwargs.get("model_id"),
+            )
         else:
             raise ValueError(f"Unknown TTS engine type: {engine_type}")
 
