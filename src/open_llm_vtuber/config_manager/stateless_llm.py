@@ -234,7 +234,6 @@ class DifyConfig(StatelessLLMBaseConfig):
 
     api_key: str = Field(..., alias="api_key")
     base_url: str = Field("https://api.dify.ai/v1", alias="base_url")
-    conversation_id: str | None = Field(None, alias="conversation_id")
     user: str = Field("user", alias="user")
     inputs: Dict[str, Any] | None = Field(None, alias="inputs")
     response_mode: Literal["streaming", "blocking"] = Field(
@@ -246,9 +245,6 @@ class DifyConfig(StatelessLLMBaseConfig):
             en="API key for Dify authentication", zh="Dify 认证的 API 密钥"
         ),
         "base_url": Description(en="Base URL for Dify API", zh="Dify API 的基础 URL"),
-        "conversation_id": Description(
-            en="Conversation ID for chat (optional)", zh="聊天的对话 ID（可选）"
-        ),
         "user": Description(en="User identifier", zh="用户标识符"),
         "inputs": Description(
             en="Additional inputs for the conversation (optional)",

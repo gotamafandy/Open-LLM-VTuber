@@ -169,7 +169,6 @@ character_config:
       dify_llm:
         api_key: 'Your Dify API key'
         base_url: 'https://api.dify.ai/v1'  # Dify API base URL
-        conversation_id: ''  # Optional: conversation ID for chat
         user: 'user'  # User identifier
         inputs: {}  # Optional: additional inputs for the conversation
         response_mode: 'streaming'  # 'streaming' or 'blocking'

@@ -18,7 +18,6 @@ class DifyLLM(StatelessLLMInterface):
         self,
         api_key: str,
         base_url: str = "https://api.dify.ai/v1",
-        conversation_id: str = None,
         user: str = "user",
         inputs: Dict[str, Any] = None,
         query: str = None,
@@ -30,7 +29,6 @@ class DifyLLM(StatelessLLMInterface):
         Args:
             api_key: The API key for Dify.
             base_url: The base URL for the Dify API. Defaults to "https://api.dify.ai/v1".
-            conversation_id: The conversation ID for chat. Defaults to None.
             user: The user identifier. Defaults to "user".
             inputs: Additional inputs for the conversation. Defaults to None.
             query: The query text. Defaults to None.
@@ -38,7 +36,7 @@ class DifyLLM(StatelessLLMInterface):
         """
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
-        self.conversation_id = conversation_id
+        self.conversation_id = None  # Will be set dynamically from API response
         self.user = user
         self.inputs = inputs or {}
         self.query = query
@@ -48,6 +46,26 @@ class DifyLLM(StatelessLLMInterface):
         logger.info(
             f"Initialized DifyLLM with base_url: {self.base_url}, response_mode: {self.response_mode}"
         )
+
+    def set_conversation_id(self, conversation_id: str) -> None:
+        """
+        Set the conversation ID for this Dify instance.
+        This should be called when a conversation_id is received from the API.
+
+        Args:
+            conversation_id: The conversation ID from Dify API
+        """
+        self.conversation_id = conversation_id
+        logger.debug(f"Set Dify conversation_id: {conversation_id}")
+
+    def get_conversation_id(self) -> str | None:
+        """
+        Get the current conversation ID.
+
+        Returns:
+            The current conversation ID or None if not set
+        """
+        return self.conversation_id
 
     async def chat_completion(
         self,
@@ -136,6 +154,18 @@ class DifyLLM(StatelessLLMInterface):
                                     break
                                 try:
                                     json_data = json.loads(data)
+                                    # Extract conversation_id if present (usually in first chunk)
+                                    if (
+                                        "conversation_id" in json_data
+                                        and not self.conversation_id
+                                    ):
+                                        self.set_conversation_id(
+                                            json_data["conversation_id"]
+                                        )
+                                        logger.info(
+                                            f"Received conversation_id from Dify: {json_data['conversation_id']}"
+                                        )
+
                                     if "answer" in json_data:
                                         yield json_data["answer"]
                                 except json.JSONDecodeError:
@@ -144,6 +174,14 @@ class DifyLLM(StatelessLLMInterface):
                     else:
                         # Handle non-streaming response
                         data = await response.json()
+
+                        # Extract conversation_id if present
+                        if "conversation_id" in data and not self.conversation_id:
+                            self.set_conversation_id(data["conversation_id"])
+                            logger.info(
+                                f"Received conversation_id from Dify: {data['conversation_id']}"
+                            )
+
                         if "answer" in data:
                             yield data["answer"]
                         else:

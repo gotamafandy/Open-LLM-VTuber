@@ -168,7 +168,6 @@ character_config:
       dify_llm:
         api_key: 'Your Dify API key' # Dify API 密钥
         base_url: 'https://api.dify.ai/v1'  # Dify API 基础 URL
-        conversation_id: ''  # 可选：聊天的对话 ID
         user: 'user'  # 用户标识符
         inputs: {}  # 可选：对话的附加输入
         response_mode: 'streaming'  # 'streaming' 或 'blocking'
