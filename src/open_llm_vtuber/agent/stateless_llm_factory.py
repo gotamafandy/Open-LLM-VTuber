@@ -9,6 +9,7 @@ from .stateless_llm.stateless_llm_with_template import (
 from .stateless_llm.openai_compatible_llm import AsyncLLM as OpenAICompatibleLLM
 from .stateless_llm.ollama_llm import OllamaLLM
 from .stateless_llm.claude_llm import AsyncLLM as ClaudeLLM
+from .stateless_llm.dify_llm import DifyLLM
 
 
 class LLMFactory:
@@ -73,6 +74,15 @@ class LLMFactory:
                 base_url=kwargs.get("base_url"),
                 model=kwargs.get("model"),
                 llm_api_key=kwargs.get("llm_api_key"),
+            )
+        elif llm_provider == "dify_llm":
+            return DifyLLM(
+                api_key=kwargs.get("api_key"),
+                base_url=kwargs.get("base_url"),
+                conversation_id=kwargs.get("conversation_id"),
+                user=kwargs.get("user"),
+                inputs=kwargs.get("inputs"),
+                response_mode=kwargs.get("response_mode"),
             )
         else:
             raise ValueError(f"Unsupported LLM provider: {llm_provider}")

@@ -165,6 +165,15 @@ character_config:
         model: 'pixtral-large-latest'
         temperature: 1.0 # value between 0 to 2
 
+      # For more details, see: https://docs.dify.ai/getting-started/introduction
+      dify_llm:
+        api_key: 'Your Dify API key'
+        base_url: 'https://api.dify.ai/v1'  # Dify API base URL
+        conversation_id: ''  # Optional: conversation ID for chat
+        user: 'user'  # User identifier
+        inputs: {}  # Optional: additional inputs for the conversation
+        response_mode: 'streaming'  # 'streaming' or 'blocking'
+
       groq_llm:
         llm_api_key: 'your groq API key'
         model: 'llama-3.3-70b-versatile'

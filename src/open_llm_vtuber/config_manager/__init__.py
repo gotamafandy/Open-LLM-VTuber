@@ -14,6 +14,7 @@ from .stateless_llm import (
     OpenAICompatibleConfig,
     ClaudeConfig,
     LlamaCppConfig,
+    DifyConfig,
 )
 from .asr import (
     ASRConfig,

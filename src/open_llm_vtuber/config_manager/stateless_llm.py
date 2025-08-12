@@ -1,5 +1,5 @@
 # config_manager/llm.py
-from typing import ClassVar, Literal
+from typing import ClassVar, Literal, Dict, Any
 from pydantic import BaseModel, Field
 from .i18n import I18nMixin, Description
 
@@ -229,6 +229,42 @@ class LlamaCppConfig(StatelessLLMBaseConfig):
     }
 
 
+class DifyConfig(StatelessLLMBaseConfig):
+    """Configuration for Dify API."""
+
+    api_key: str = Field(..., alias="api_key")
+    base_url: str = Field("https://api.dify.ai/v1", alias="base_url")
+    conversation_id: str | None = Field(None, alias="conversation_id")
+    user: str = Field("user", alias="user")
+    inputs: Dict[str, Any] | None = Field(None, alias="inputs")
+    response_mode: Literal["streaming", "blocking"] = Field(
+        "streaming", alias="response_mode"
+    )
+
+    _DIFY_DESCRIPTIONS: ClassVar[dict[str, Description]] = {
+        "api_key": Description(
+            en="API key for Dify authentication", zh="Dify 认证的 API 密钥"
+        ),
+        "base_url": Description(en="Base URL for Dify API", zh="Dify API 的基础 URL"),
+        "conversation_id": Description(
+            en="Conversation ID for chat (optional)", zh="聊天的对话 ID（可选）"
+        ),
+        "user": Description(en="User identifier", zh="用户标识符"),
+        "inputs": Description(
+            en="Additional inputs for the conversation (optional)",
+            zh="对话的附加输入（可选）",
+        ),
+        "response_mode": Description(
+            en="Response mode: streaming or blocking", zh="响应模式：流式或阻塞"
+        ),
+    }
+
+    DESCRIPTIONS: ClassVar[dict[str, Description]] = {
+        **StatelessLLMBaseConfig.DESCRIPTIONS,
+        **_DIFY_DESCRIPTIONS,
+    }
+
+
 class StatelessLLMConfigs(I18nMixin, BaseModel):
     """Pool of LLM provider configurations.
     This class contains configurations for different LLM providers."""
@@ -249,6 +285,7 @@ class StatelessLLMConfigs(I18nMixin, BaseModel):
     claude_llm: ClaudeConfig | None = Field(None, alias="claude_llm")
     llama_cpp_llm: LlamaCppConfig | None = Field(None, alias="llama_cpp_llm")
     mistral_llm: MistralConfig | None = Field(None, alias="mistral_llm")
+    dify_llm: DifyConfig | None = Field(None, alias="dify_llm")
 
     DESCRIPTIONS: ClassVar[dict[str, Description]] = {
         "stateless_llm_with_template": Description(
@@ -282,4 +319,5 @@ class StatelessLLMConfigs(I18nMixin, BaseModel):
         "llama_cpp_llm": Description(
             en="Configuration for local Llama.cpp", zh="本地Llama.cpp配置"
         ),
+        "dify_llm": Description(en="Configuration for Dify API", zh="Dify API 配置"),
     }

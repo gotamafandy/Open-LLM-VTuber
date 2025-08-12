@@ -58,7 +58,7 @@ character_config:
         # 例如：
         # 'openai_compatible_llm', 'llama_cpp_llm', 'claude_llm', 'ollama_llm'
         # 'openai_llm', 'gemini_llm', 'zhipu_llm', 'deepseek_llm', 'groq_llm'
-        # 'mistral_llm', 'lmstudio_llm' 之类的
+        # 'mistral_llm', 'lmstudio_llm', 'dify_llm' 之类的
         llm_provider: 'ollama_llm' # 使用的 LLM 提供商
         # 是否在第一句回应时遇上逗号就直接生成音频以减少首句延迟（默认：True）
         faster_first_response: True
@@ -164,6 +164,15 @@ character_config:
         model: 'pixtral-large-latest' # 使用的模型
         temperature: 1.0 # 温度，介于 0 到 2 之间
 
+      # 详细文档见：https://docs.dify.ai/getting-started/introduction
+      dify_llm:
+        api_key: 'Your Dify API key' # Dify API 密钥
+        base_url: 'https://api.dify.ai/v1'  # Dify API 基础 URL
+        conversation_id: ''  # 可选：聊天的对话 ID
+        user: 'user'  # 用户标识符
+        inputs: {}  # 可选：对话的附加输入
+        response_mode: 'streaming'  # 'streaming' 或 'blocking'
+        
       groq_llm:
         llm_api_key: 'your groq API key' # Groq API 密钥
         model: 'llama-3.3-70b-versatile' # 使用的模型
