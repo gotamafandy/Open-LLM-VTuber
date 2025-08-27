@@ -153,6 +153,7 @@ class TTSFactory:
                 file_extension=kwargs.get(
                     "file_extension"
                 ),  # Will use default "mp3" if not in kwargs
+                instruction=kwargs.get("instruction"),
             )
 
         elif engine_type == "spark_tts":

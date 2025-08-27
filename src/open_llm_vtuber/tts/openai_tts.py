@@ -27,6 +27,7 @@ class TTSEngine(TTSInterface):
         api_key="not-needed",  # Default for local/compatible servers that don't require auth
         base_url="http://localhost:8880/v1",  # Default to the specified endpoint
         file_extension: str = "mp3",  # Configurable file extension
+        instruction: str = "",
         **kwargs,  # Allow passing additional args to OpenAI client
     ):
         """
@@ -94,6 +95,7 @@ class TTSEngine(TTSInterface):
                     input=text,
                     response_format=self.file_extension,  # Use configured extension
                     speed=speed,
+                    instruction=self.instruction,
                 ) as response
             ):
                 # Stream the audio content to the file
