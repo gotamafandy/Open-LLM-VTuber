@@ -179,7 +179,7 @@ character_config:
 
   # === 自动语音识别 ===
   asr_config:
-    # 语音转文本模型选项：'faster_whisper', 'whisper_cpp', 'whisper', 'azure_asr', 'fun_asr', 'groq_whisper_asr', 'sherpa_onnx_asr'
+    # 语音转文本模型选项：'faster_whisper', 'whisper_cpp', 'whisper', 'azure_asr', 'fun_asr', 'groq_whisper_asr', 'sherpa_onnx_asr', 'gpt_asr'
     asr_model: 'sherpa_onnx_asr' # 使用的语音识别模型
 
     azure_asr:
@@ -266,6 +266,16 @@ character_config:
       use_itn: True # 对 SenseVoice 模型启用 ITN（如果不是 SenseVoice 模型，则应设置为 False）
       # 推理平台（cpu 或 cuda）(cuda 需要额外配置，请参考文档)
       provider: 'cpu'
+
+    # OpenAI GPT ASR (Whisper) 配置
+    # 需要 OpenAI API 密钥和互联网连接
+    gpt_asr:
+      api_key: 'your_openai_api_key' # 您的 OpenAI API 密钥
+      model: 'whisper-1' # 要使用的 Whisper 模型（目前只有 'whisper-1' 可用）
+      language: '' # 音频语言（可选，未指定时自动检测）
+      response_format: 'text' # 响应格式（'text' 或 'verbose_json'）
+      temperature: 0.0 # 采样温度（0.0 表示确定性结果）
+      prompt: '' # 可选的转录风格引导提示
 
     groq_whisper_asr:
       api_key: ''

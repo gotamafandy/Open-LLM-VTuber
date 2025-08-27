@@ -180,7 +180,7 @@ character_config:
 
   # === Automatic Speech Recognition ===
   asr_config:
-    # speech to text model options: 'faster_whisper', 'whisper_cpp', 'whisper', 'azure_asr', 'fun_asr', 'groq_whisper_asr', 'sherpa_onnx_asr'
+    # speech to text model options: 'faster_whisper', 'whisper_cpp', 'whisper', 'azure_asr', 'fun_asr', 'groq_whisper_asr', 'sherpa_onnx_asr', 'gpt_asr'
     asr_model: 'sherpa_onnx_asr'
 
     azure_asr:
@@ -267,6 +267,16 @@ character_config:
       # sample_rate: 16000 # Sample rate (should match the model's expected sample rate)
       # feature_dim: 80       # Feature dimension (should match the model's expected feature dimension)
       use_itn: True # Enable ITN for SenseVoice models (should set to False if not using SenseVoice models)
+
+    # OpenAI GPT ASR (Whisper) configuration
+    # Requires OpenAI API key and internet connection
+    gpt_asr:
+      api_key: 'your_openai_api_key' # Your OpenAI API key
+      model: 'whisper-1' # Whisper model to use (currently only 'whisper-1' is available)
+      language: '' # Language of the audio (optional, auto-detect if not specified)
+      response_format: 'text' # Format of the response ('text' or 'verbose_json')
+      temperature: 0.0 # Sampling temperature (0.0 for deterministic results)
+      prompt: '' # Optional prompt to guide transcription style
       # Provider for inference (cpu or cuda) (cuda option needs additional settings. Please check our docs)
       provider: 'cpu' 
 

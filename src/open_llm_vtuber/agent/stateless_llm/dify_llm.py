@@ -11,6 +11,15 @@ from loguru import logger
 from .stateless_llm_interface import StatelessLLMInterface
 
 
+# Global cache for Dify conversation IDs, keyed by user
+# This ensures each user maintains their own conversation state
+_dify_conversation_cache: Dict[str, str] = {}
+
+# Global cache for Dify task IDs, keyed by user
+# This ensures each user maintains their own task state
+_dify_task_id_cache: Dict[str, str] = {}
+
+
 class DifyLLM(StatelessLLMInterface):
     """Dify LLM implementation for chat completion."""
 
@@ -36,36 +45,123 @@ class DifyLLM(StatelessLLMInterface):
         """
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
-        self.conversation_id = None  # Will be set dynamically from API response
         self.user = user
         self.inputs = inputs or {}
         self.query = query
         self.response_mode = response_mode
         self.support_tools = False  # Dify doesn't support tools in the same way
 
+        # Load existing conversation_id from cache if available
+        self.conversation_id = _dify_conversation_cache.get(self.user)
+        self.task_id = None
+
         logger.info(
-            f"Initialized DifyLLM with base_url: {self.base_url}, response_mode: {self.response_mode}"
+            f"Initialized DifyLLM with base_url: {self.base_url}, response_mode: {self.response_mode}, user: {self.user}"
         )
+
+    def set_task_id(self, task_id: str) -> None:
+        """
+        Set the task ID for this Dify instance and store it in the global cache.
+        This should be called when a task_id is received from the API.
+
+        Args:
+            task_id: The task ID from Dify API
+        """
+        self.task_id = task_id
+        _dify_task_id_cache[self.user] = task_id
+
+    def get_task_id(self) -> str | None:
+        """
+        Returns:
+            The current task ID or None if not set
+        """
+        return _dify_task_id_cache.get(self.user)
 
     def set_conversation_id(self, conversation_id: str) -> None:
         """
-        Set the conversation ID for this Dify instance.
+        Set the conversation ID for this Dify instance and store it in the global cache.
         This should be called when a conversation_id is received from the API.
 
         Args:
             conversation_id: The conversation ID from Dify API
         """
         self.conversation_id = conversation_id
-        logger.debug(f"Set Dify conversation_id: {conversation_id}")
+        # Store in global cache keyed by user
+        _dify_conversation_cache[self.user] = conversation_id
+        logger.debug(
+            f"Set Dify conversation_id for user '{self.user}': {conversation_id}"
+        )
 
     def get_conversation_id(self) -> str | None:
         """
-        Get the current conversation ID.
+        Get the current conversation ID from cache.
 
         Returns:
             The current conversation ID or None if not set
         """
-        return self.conversation_id
+        return _dify_conversation_cache.get(self.user)
+
+    def get_cached_conversation_id(self) -> str | None:
+        """
+        Get the conversation ID from the global cache for this user.
+
+        Returns:
+            The cached conversation ID or None if not found
+        """
+        return _dify_conversation_cache.get(self.user)
+
+    def clear_conversation_id(self) -> None:
+        """
+        Clear the conversation ID for this user from cache.
+        Useful for starting a new conversation.
+        """
+        if self.user in _dify_conversation_cache:
+            del _dify_conversation_cache[self.user]
+            self.conversation_id = None
+            logger.debug(f"Cleared Dify conversation_id for user '{self.user}'")
+
+    async def cancel_task(self, task_id: str) -> None:
+        """
+        Cancel a running chat message task by its ID.
+
+        Args:
+            task_id: Task ID to stop
+        """
+        try:
+            stop_url = f"{self.base_url}/chat-messages/{task_id}/stop"
+            
+            logger.info(f"Stopping Dify task: {task_id} for user: {self.user}")
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    stop_url,
+                    json={"user": self.user},
+                    headers={"Authorization": f"Bearer {self.api_key}"}
+                ) as response:
+                    if response.status == 200:
+                        logger.info(
+                            f"Dify task stopped successfully: {task_id} for user: {self.user}, status: {response.status}"
+                        )
+                    else:
+                        logger.warning(
+                            f"Dify task stop request returned non-200 status: {task_id} for user: {self.user}, status: {response.status}"
+                        )
+                        
+        except Exception as error:
+            logger.error(
+                f"Error stopping Dify task: {task_id} for user: {self.user}, error: {str(error)}"
+            )
+
+    @classmethod
+    def get_cache_info(cls) -> Dict[str, str]:
+        """
+        Get information about all cached conversation IDs.
+        Useful for debugging and monitoring.
+
+        Returns:
+            Dictionary mapping user to conversation_id
+        """
+        return _dify_conversation_cache.copy()
 
     async def chat_completion(
         self,
@@ -104,10 +200,44 @@ class DifyLLM(StatelessLLMInterface):
                 yield "Error: No user messages found"
                 return
 
-            query = user_messages[-1].get("content", "")
-            if not query:
+            # Extract and process the content from the last user message
+            last_message_content = user_messages[-1].get("content", "")
+            if not last_message_content:
                 yield "Error: Empty user message"
                 return
+
+            # Handle VTuber message format: [{'type': 'text', 'text': 'halo'}]
+            if isinstance(last_message_content, list):
+                # Extract all text content from the array
+                text_parts = []
+                for item in last_message_content:
+                    if isinstance(item, dict) and item.get("type") == "text":
+                        text = item.get("text", "").strip()
+                        if text:
+                            text_parts.append(text)
+
+                if not text_parts:
+                    yield "Error: No text content found in message"
+                    return
+
+                # Combine all text parts with ", " as separator
+                query = ", ".join(text_parts)
+                logger.debug(
+                    f"Combined VTuber message parts: {text_parts} -> '{query}'"
+                )
+            else:
+                # Handle regular string content
+                query = str(last_message_content)
+
+            # Log the processed query for debugging
+            logger.debug(f"Original message content: {last_message_content}")
+            logger.debug(f"Processed query for Dify: '{query}'")
+
+            task_id = self.get_task_id()
+
+            # Cancel previously running task if it exists
+            if task_id:
+                await self.cancel_task(task_id)
 
             # Prepare the request payload
             payload = {
@@ -117,8 +247,10 @@ class DifyLLM(StatelessLLMInterface):
                 "user": self.user,
             }
 
-            if self.conversation_id:
-                payload["conversation_id"] = self.conversation_id
+            # Get conversation_id from cache
+            conversation_id = self.get_conversation_id()
+            if conversation_id:
+                payload["conversation_id"] = conversation_id
 
             # Set up headers
             headers = {
@@ -154,6 +286,13 @@ class DifyLLM(StatelessLLMInterface):
                                     break
                                 try:
                                     json_data = json.loads(data)
+                                    
+                                    if "task_id" in json_data:
+                                        self.set_task_id(json_data["task_id"])
+                                        logger.info(
+                                            f"Received task_id from Dify: {json_data['task_id']}"
+                                        )
+                                        
                                     # Extract conversation_id if present (usually in first chunk)
                                     if (
                                         "conversation_id" in json_data

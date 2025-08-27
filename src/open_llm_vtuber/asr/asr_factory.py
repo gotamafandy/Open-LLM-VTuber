@@ -58,5 +58,16 @@ class ASRFactory:
             from .sherpa_onnx_asr import VoiceRecognition as SherpaOnnxASR
 
             return SherpaOnnxASR(**kwargs)
+        elif system_name == "gpt_asr":
+            from .gpt_asr import VoiceRecognition as GPTASR
+
+            return GPTASR(
+                api_key=kwargs.get("api_key"),
+                model=kwargs.get("model"),
+                language=kwargs.get("language"),
+                response_format=kwargs.get("response_format"),
+                temperature=kwargs.get("temperature"),
+                prompt=kwargs.get("prompt"),
+            )
         else:
             raise ValueError(f"Unknown ASR system: {system_name}")

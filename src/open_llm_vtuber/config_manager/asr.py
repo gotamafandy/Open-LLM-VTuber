@@ -281,6 +281,39 @@ class SherpaOnnxASRConfig(I18nMixin):
         return values
 
 
+class GPTASRConfig(I18nMixin):
+    """Configuration for OpenAI GPT ASR (Whisper)."""
+
+    api_key: str = Field(..., alias="api_key")
+    model: str = Field("whisper-1", alias="model")
+    language: Optional[str] = Field(None, alias="language")
+    response_format: str = Field("text", alias="response_format")
+    temperature: float = Field(0.0, alias="temperature")
+    prompt: Optional[str] = Field(None, alias="prompt")
+
+    DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
+        "api_key": Description(
+            en="OpenAI API key for speech-to-text", zh="OpenAI 语音转文本 API 密钥"
+        ),
+        "model": Description(
+            en="Whisper model to use", zh="要使用的 Whisper 模型"
+        ),
+        "language": Description(
+            en="Language of the audio (optional, auto-detect if not specified)",
+            zh="音频语言（未指定时自动检测）",
+        ),
+        "response_format": Description(
+            en="Format of the response", zh="响应格式"
+        ),
+        "temperature": Description(
+            en="Sampling temperature for transcription", zh="转录的采样温度"
+        ),
+        "prompt": Description(
+            en="Optional prompt to guide transcription", zh="可选的转录引导提示"
+        ),
+    }
+
+
 class ASRConfig(I18nMixin):
     """Configuration for Automatic Speech Recognition."""
 
@@ -292,6 +325,7 @@ class ASRConfig(I18nMixin):
         "fun_asr",
         "groq_whisper_asr",
         "sherpa_onnx_asr",
+        "gpt_asr",
     ] = Field(..., alias="asr_model")
     azure_asr: Optional[AzureASRConfig] = Field(None, alias="azure_asr")
     faster_whisper: Optional[FasterWhisperConfig] = Field(None, alias="faster_whisper")
@@ -304,6 +338,7 @@ class ASRConfig(I18nMixin):
     sherpa_onnx_asr: Optional[SherpaOnnxASRConfig] = Field(
         None, alias="sherpa_onnx_asr"
     )
+    gpt_asr: Optional[GPTASRConfig] = Field(None, alias="gpt_asr")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "asr_model": Description(
@@ -323,6 +358,9 @@ class ASRConfig(I18nMixin):
         ),
         "sherpa_onnx_asr": Description(
             en="Configuration for Sherpa Onnx ASR", zh="Sherpa Onnx ASR 配置"
+        ),
+        "gpt_asr": Description(
+            en="Configuration for OpenAI GPT ASR (Whisper)", zh="OpenAI GPT ASR (Whisper) 配置"
         ),
     }
 
@@ -345,5 +383,7 @@ class ASRConfig(I18nMixin):
             values.groq_whisper_asr.model_validate(values.groq_whisper_asr.model_dump())
         elif asr_model == "SherpaOnnxASR" and values.sherpa_onnx_asr is not None:
             values.sherpa_onnx_asr.model_validate(values.sherpa_onnx_asr.model_dump())
+        elif asr_model == "gpt_asr" and values.gpt_asr is not None:
+            values.gpt_asr.model_validate(values.gpt_asr.model_dump())
 
         return values
