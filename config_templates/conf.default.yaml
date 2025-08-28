@@ -426,6 +426,7 @@ character_config:
       api_key: 'not-needed' # API key if required by the server
       base_url: 'http://localhost:8880/v1' # Base URL of the TTS server
       file_extension: 'mp3' # Audio file format ('mp3' or 'wav')
+      instructions: '' # Instructions for voice style and tone (e.g., 'Speak in a cheerful and positive tone')
 
     # For more details, see: https://platform.minimaxi.com/document/Announcement
     minimax_tts:

@@ -349,6 +349,7 @@ class OpenAITTSConfig(I18nMixin):
     api_key: Optional[str] = Field(None, alias="api_key")
     base_url: Optional[str] = Field(None, alias="base_url")
     file_extension: Literal["mp3", "wav"] = Field("mp3", alias="file_extension")
+    instructions: Optional[str] = Field("", alias="instructions")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "model": Description(
@@ -370,6 +371,10 @@ class OpenAITTSConfig(I18nMixin):
         "file_extension": Description(
             en="Audio file format (mp3 or wav, defaults to mp3)",
             zh="音频文件格式（mp3 或 wav，默认为 mp3）",
+        ),
+        "instructions": Description(
+            en="Instructions for voice style and tone (e.g., 'Speak in a cheerful and positive tone')",
+            zh="语音风格和语调的指令（例如：'用欢快积极的语调说话'）",
         ),
     }
 
